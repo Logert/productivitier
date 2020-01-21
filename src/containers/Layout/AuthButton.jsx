@@ -18,6 +18,10 @@ const AuthButton = () => {
   const handleClose = () => {
     setAnchorEl(null);
   };
+  const clearStorage = () => {
+    localStorage.clear();
+    window.location.reload();
+  };
 
   return (
     <div>
@@ -47,6 +51,7 @@ const AuthButton = () => {
       >
         <MenuItem onClick={handleClose}>Profile</MenuItem>
         <MenuItem onClick={handleClose}>My account</MenuItem>
+        <MenuItem onClick={clearStorage}>clear storage</MenuItem>
       </Menu>
     </div>
   );

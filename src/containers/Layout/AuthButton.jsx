@@ -1,22 +1,33 @@
 import React from 'react';
-import { IconButton, Menu, MenuItem } from '@material-ui/core';
-import AccountCircleIcon from '@material-ui/icons/AccountCircle';
+import { IconButton, Menu, MenuItem, Avatar, makeStyles } from '@material-ui/core';
+import * as firebase from "firebase/app";
+import { withRouter } from 'react-router-dom';
 
-const AuthButton = () => {
-  const [auth, setAuth] = React.useState(true);
+const useStyles = makeStyles({
+  avatar: {
+    width: 30,
+    height: 30,
+  }
+});
+
+const AuthButton = ({ history }) => {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
+  const currentUser = firebase.auth().currentUser;
 
-  const handleChange = event => {
-    setAuth(event.target.checked);
-  };
+  const classes = useStyles();
 
   const handleMenu = event => {
     setAnchorEl(event.currentTarget);
   };
 
   const handleClose = () => {
+    history.push('/profile');
     setAnchorEl(null);
+  };
+
+  const handleLogout = () => {
+    firebase.auth().signOut();
   };
 
   return (
@@ -28,7 +39,7 @@ const AuthButton = () => {
         onClick={handleMenu}
         color="inherit"
       >
-        <AccountCircleIcon/>
+        <Avatar alt={currentUser.displayName} src={currentUser.photoURL} className={classes.avatar}/>
       </IconButton>
       <Menu
         id="menu-appbar"
@@ -45,11 +56,11 @@ const AuthButton = () => {
         open={open}
         onClose={handleClose}
       >
-        <MenuItem onClick={handleClose}>Profile</MenuItem>
-        <MenuItem onClick={handleClose}>My account</MenuItem>
+        <MenuItem onClick={handleClose}>Профиль</MenuItem>
+        <MenuItem onClick={handleLogout}>Выйти</MenuItem>
       </Menu>
     </div>
   );
 };
 
-export default AuthButton;
+export default withRouter(AuthButton);

@@ -3,7 +3,6 @@ import {
   HashRouter,
   Route,
   Switch,
-  Redirect,
 } from 'react-router-dom';
 
 import Layout from './containers/Layout';
@@ -11,6 +10,7 @@ import Home from './containers/Home';
 import Settings from './containers/Settings';
 import Direction from './containers/Direction';
 import SignIn from './containers/SignIn';
+import Profile from './containers/Profile';
 
 import * as firebase from "firebase/app";
 import "firebase/auth";
@@ -25,8 +25,7 @@ const Router = () => (
   <FirebaseAuthProvider {...getFirebaseConfig()} firebase={firebase}>
     <HashRouter>
       <FirebaseAuthConsumer>
-        {({ isSignedIn, user, providerId }) => {
-          console.log(isSignedIn, user);
+        {({ isSignedIn }) => {
           if (isSignedIn) {
             return (
               <Layout>
@@ -34,6 +33,7 @@ const Router = () => (
                   <Route path="/" exact component={Home}/>
                   <Route path="/settings" exact component={Settings}/>
                   <Route path="/:directionId(\d)" exact component={Direction}/>
+                  <Route path="/profile" exact component={Profile}/>
                 </Switch>
               </Layout>
             )

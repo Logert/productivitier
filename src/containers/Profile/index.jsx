@@ -1,15 +1,17 @@
 import React from 'react';
 import { Box } from '@material-ui/core';
-import * as firebase from "firebase/app";
+import { useSelector } from 'react-redux';
 
 import Header from '../Layout/Header';
 
 const Profile = props => {
+  const profile = useSelector(state => state.firebase.profile);
+
   return (
     <div>
       <Header onBack={props.history.goBack}/>
       <Box p={3}>
-        <pre>{JSON.stringify(firebase.auth().currentUser, null, 2)}</pre>
+        <pre>{JSON.stringify(profile, null, 2)}</pre>
       </Box>
     </div>
   )

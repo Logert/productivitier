@@ -1,11 +1,11 @@
 import { combineReducers } from 'redux';
+import { firebaseReducer } from 'react-redux-firebase';
 
-import auth from './auth/reducer';
 import directions from './directions/reducer';
 import sprint from './sprint/reducer';
 
 export default combineReducers({
-  auth,
+  firebase: firebaseReducer,
   directions,
   sprint,
 });

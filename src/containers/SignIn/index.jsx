@@ -3,8 +3,7 @@ import { Avatar, Button, CssBaseline, Typography, makeStyles, Container } from '
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import AppleIcon from '@material-ui/icons/Apple';
 import AndroidIcon from '@material-ui/icons/Android';
-
-import * as firebase from "firebase/app";
+import { useFirebase } from 'react-redux-firebase';
 
 const useStyles = makeStyles(theme => ({
   paper: {
@@ -28,17 +27,16 @@ const useStyles = makeStyles(theme => ({
 
 export default function SignIn() {
   const classes = useStyles();
+  const firebase = useFirebase();
 
   const handleAuthGoogle = () => {
-    const googleAuthProvider = new firebase.auth.GoogleAuthProvider();
-    firebase.auth().signInWithPopup(googleAuthProvider);
+    firebase.login({
+      provider: 'google',
+      type: 'popup',
+    });
   };
 
-  const handleAuthApple = () => {
-    const provider = new firebase.auth.OAuthProvider('apple.com');
-    provider.setCustomParameters({ locale: 'ru' });
-    firebase.auth().signInWithPopup(provider);
-  };
+  const handleAuthApple = () => {};
 
   const handleAuthAnonymously = () => {
     firebase.auth().signInAnonymously();

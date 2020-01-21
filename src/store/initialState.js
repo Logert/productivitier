@@ -1,7 +1,3 @@
-import moment from 'moment';
-
-import { createDirectionMap } from '../utils';
-
 const defaultDirections = [
   { id: 0, name: 'Музыка', img: 'music.jpg', description: '' },
   { id: 1, name: 'Бизнес', img: 'business.jpg', description: '' },
@@ -12,16 +8,6 @@ const defaultDirections = [
 ];
 
 export default {
-  auth: {},
-  sprint: [
-    {
-      date: [moment().subtract(2, 'days').startOf('D').valueOf(), moment().subtract(2, 'days').endOf('D').valueOf()],
-      direction: createDirectionMap(defaultDirections),
-    },
-    {
-      date: [moment().subtract(1, 'days').startOf('D').valueOf(), moment().subtract(1, 'days').endOf('D').valueOf()],
-      direction: createDirectionMap(defaultDirections),
-    },
-  ],
+  sprint: [],
   directions: defaultDirections,
 };

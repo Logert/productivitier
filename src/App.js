@@ -1,16 +1,16 @@
 import React from 'react';
 import { Provider } from 'react-redux';
-import { PersistGate } from 'redux-persist/integration/react';
+import { ReactReduxFirebaseProvider } from 'react-redux-firebase';
 
-import { store, persistor } from './store';
+import { store, rrfProps } from './store';
 
 import Router from './router';
 
 const App = () => (
   <Provider store={store}>
-    <PersistGate persistor={persistor}>
+    <ReactReduxFirebaseProvider {...rrfProps}>
       <Router />
-    </PersistGate>
+    </ReactReduxFirebaseProvider>
   </Provider>
 );
 

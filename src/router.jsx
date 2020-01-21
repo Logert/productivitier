@@ -3,7 +3,10 @@ import {
   HashRouter,
   Route,
   Switch,
+  Redirect,
 } from 'react-router-dom';
+import { useSelector } from 'react-redux'
+import { isLoaded, isEmpty } from 'react-redux-firebase'
 
 import Layout from './containers/Layout';
 import Home from './containers/Home';
@@ -12,41 +15,30 @@ import Direction from './containers/Direction';
 import SignIn from './containers/SignIn';
 import Profile from './containers/Profile';
 
-import * as firebase from "firebase/app";
-import "firebase/auth";
-import {
-  FirebaseAuthProvider,
-  FirebaseAuthConsumer,
-} from "@react-firebase/auth";
+const Router = () => {
+  const auth = useSelector(state => state.firebase.auth);
+  const isLogin = isLoaded(auth) && !isEmpty(auth);
 
-import { getFirebaseConfig } from './utils';
-
-const Router = () => (
-  <FirebaseAuthProvider {...getFirebaseConfig()} firebase={firebase}>
+  return (
     <HashRouter>
-      <FirebaseAuthConsumer>
-        {({ isSignedIn }) => {
-          if (isSignedIn) {
-            return (
-              <Layout>
-                <Switch>
-                  <Route path="/" exact component={Home}/>
-                  <Route path="/settings" exact component={Settings}/>
-                  <Route path="/:directionId(\d)" exact component={Direction}/>
-                  <Route path="/profile" exact component={Profile}/>
-                </Switch>
-              </Layout>
-            )
-          }
-          return (
-            <Switch>
-              <Route path="/" exact component={SignIn}/>;
-            </Switch>
-          )
-        }}
-      </FirebaseAuthConsumer>
+      {isLogin ? (
+        <Layout>
+          <Switch>
+            <Route path="/" exact component={Home}/>
+            <Route path="/settings" exact component={Settings}/>
+            <Route path="/:directionId(\d)" exact component={Direction}/>
+            <Route path="/profile" exact component={Profile}/>
+            <Redirect to="/"/>
+          </Switch>
+        </Layout>
+      ) : (
+        <Switch>
+          <Route path="/" exact component={SignIn}/>
+          <Redirect to="/"/>
+        </Switch>
+      )}
     </HashRouter>
-  </FirebaseAuthProvider>
-);
+  );
+};
 
 export default Router;

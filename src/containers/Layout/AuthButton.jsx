@@ -1,7 +1,8 @@
 import React from 'react';
 import { IconButton, Menu, MenuItem, Avatar, makeStyles } from '@material-ui/core';
-import * as firebase from "firebase/app";
 import { withRouter } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import { useFirebase } from 'react-redux-firebase';
 
 const useStyles = makeStyles({
   avatar: {
@@ -13,7 +14,8 @@ const useStyles = makeStyles({
 const AuthButton = ({ history }) => {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
-  const currentUser = firebase.auth().currentUser;
+  const firebase = useFirebase();
+  const profile = useSelector(state => state.firebase.profile);
 
   const classes = useStyles();
 
@@ -25,13 +27,9 @@ const AuthButton = ({ history }) => {
     history.push('/profile');
     setAnchorEl(null);
   };
-  const clearStorage = () => {
-    localStorage.clear();
-    window.location.reload();
-  };
 
   const handleLogout = () => {
-    firebase.auth().signOut();
+    firebase.logout();
   };
 
   return (
@@ -43,7 +41,7 @@ const AuthButton = ({ history }) => {
         onClick={handleMenu}
         color="inherit"
       >
-        <Avatar alt={currentUser.displayName} src={currentUser.photoURL} className={classes.avatar}/>
+        <Avatar alt={profile.displayName} src={profile.avatarUrl} className={classes.avatar}/>
       </IconButton>
       <Menu
         id="menu-appbar"
@@ -62,7 +60,6 @@ const AuthButton = ({ history }) => {
       >
         <MenuItem onClick={handleClose}>Профиль</MenuItem>
         <MenuItem onClick={handleLogout}>Выйти</MenuItem>
-        <MenuItem onClick={clearStorage}>clear storage</MenuItem>
       </Menu>
     </div>
   );

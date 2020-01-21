@@ -88,7 +88,7 @@ const Direction = ({ match, history }) => {
   return (
     <div>
       <Header onBack={history.goBack}/>
-      <AppBar position="static" color="default">
+      <AppBar position="sticky" color="default">
         <Tabs
           variant="scrollable"
           scrollButtons="on"

@@ -22,10 +22,6 @@ export default {
       date: [moment().subtract(1, 'days').startOf('D').valueOf(), moment().subtract(1, 'days').endOf('D').valueOf()],
       direction: createDirectionMap(defaultDirections),
     },
-    {
-      date: [moment().startOf('D').valueOf(), moment().endOf('D').valueOf()],
-      direction: createDirectionMap(defaultDirections),
-    }
   ],
   directions: defaultDirections,
 };

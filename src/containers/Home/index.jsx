@@ -77,7 +77,7 @@ const Home = () => {
   const firebase = useFirebase();
   const owner = useSelector(state => state.firebase.auth.uid);
   useFirebaseConnect([{ path: 'directions', queryParams: ['orderByChild=owner', `equalTo=${owner}`] }]);
-  useFirebaseConnect([{ path: 'sprints', queryParams: ['orderByChild=owner', `equalTo=${owner}`] }]);
+  useFirebaseConnect([{ type: 'once', path: 'sprints', queryParams: ['orderByChild=owner', `equalTo=${owner}`] }]);
   const directions = (useSelector(state => state.firebase.ordered.directions) || []).filter(d => d.value.state === 'ACTIVE');
   const directionsData = useSelector(state => state.firebase.data.directions);
   const sprints = useSelector(state => state.firebase.ordered.sprints);

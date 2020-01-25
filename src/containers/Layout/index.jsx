@@ -34,7 +34,7 @@ const Layout = ({ children, ...props }) => {
   const auth = useSelector(state => state.firebase.auth);
   const profile = useSelector(state => state.firebase.profile);
   useFirebaseConnect([{ path: `users/${auth.uid}` }]);
-  useFirebaseConnect([{ path: 'sprints', queryParams: ['orderByChild=owner', `equalTo=${auth.uid}`] }]);
+  useFirebaseConnect([{ type: 'once', path: 'sprints', queryParams: ['orderByChild=owner', `equalTo=${auth.uid}`] }]);
   useFirebaseConnect([{ path: 'directions', queryParams: ['orderByChild=owner', `equalTo=${auth.uid}`] }]);
   const users = useSelector(state => state.firebase.data.users);
   const sprints = useSelector(state => state.firebase.ordered.sprints);

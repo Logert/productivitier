@@ -14,7 +14,7 @@ const useStyles = makeStyles({
 
 const Header = ({ title, onBack, showSprint }) => {
   const owner = useSelector(state => state.firebase.auth.uid);
-  useFirebaseConnect([{ path: 'sprints', queryParams: ['orderByChild=owner', `equalTo=${owner}`] }]);
+  useFirebaseConnect([{ type: 'once', path: 'sprints', queryParams: ['orderByChild=owner', `equalTo=${owner}`] }]);
   const sprints = useSelector(state => state.firebase.ordered.sprints) || [];
 
   const lastSprintDate = isLoaded(sprints) && sprints.length ? sprints[sprints.length - 1].value.range[0] : '';

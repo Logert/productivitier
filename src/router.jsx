@@ -17,7 +17,7 @@ import Profile from './containers/Profile';
 
 const Router = () => {
   const auth = useSelector(state => state.firebase.auth);
-  const isLogin = isLoaded(auth) && !isEmpty(auth);
+  const isLogin = !isEmpty(auth);
 
   return (
     <HashRouter>
@@ -26,7 +26,7 @@ const Router = () => {
           <Switch>
             <Route path="/" exact component={Home}/>
             <Route path="/settings" exact component={Settings}/>
-            <Route path="/:directionId(\d)" exact component={Direction}/>
+            <Route path="/direction/:dirUid" exact component={Direction}/>
             <Route path="/profile" exact component={Profile}/>
             <Redirect to="/"/>
           </Switch>

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import {
   Typography,
@@ -13,15 +13,17 @@ import {
   makeStyles,
   Button,
   Box,
+  CircularProgress,
+  Select,
+  MenuItem,
+  Avatar,
 } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
 import DoneIcon from '@material-ui/icons/Done';
 import ShareIcon from '@material-ui/icons/Share';
+import { useFirebaseConnect, isLoaded, useFirebase, isEmpty } from 'react-redux-firebase';
 
 import Header from '../Layout/Header';
-
-import { ADD_DIRECTION } from '../../store/directions/action';
-import { UPDATE_DIRECTIONS_SPRINT } from '../../store/sprint/action';
 import moment from 'moment';
 
 const useBadgeStyles = makeStyles({
@@ -59,18 +61,38 @@ const useStyles = makeStyles({
   },
   field: {
     marginBottom: 15,
-  }
+  },
+  select: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
 });
 
 const Home = () => {
-  const directions = useSelector(state => state.directions);
-  const currentSprint = useSelector(state => state.sprint.find(item => moment().isBetween(moment(item.date[0]), moment(item.date[1]))));
-  const dispatch = useDispatch();
-  const addDirection = React.useCallback(data => {dispatch(ADD_DIRECTION(data))});
-  const updateDirectionSprint = React.useCallback(data => {dispatch(UPDATE_DIRECTIONS_SPRINT(data))});
   const [drawer, setDrawer] = useState(false);
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
+  const [img, setImg] = useState('music.jpg');
+  const firebase = useFirebase();
+  const owner = useSelector(state => state.firebase.auth.uid);
+  useFirebaseConnect([{ path: 'directions', queryParams: ['orderByChild=owner', `equalTo=${owner}`] }]);
+  useFirebaseConnect([{ path: 'sprints', queryParams: ['orderByChild=owner', `equalTo=${owner}`] }]);
+  const directions = (useSelector(state => state.firebase.ordered.directions) || []).filter(d => d.value.state === 'ACTIVE');
+  const directionsData = useSelector(state => state.firebase.data.directions);
+  const sprints = useSelector(state => state.firebase.ordered.sprints);
+  const actionMap = isLoaded(sprints) && !isEmpty(sprints) ? sprints.reduce((res, { value }) => {
+    if (moment().isBetween(moment(value.range[0], 'DD.MM.YYYY').startOf('D'), moment(value.range[1], 'DD.MM.YYYY').endOf('D'))) {
+      if (value.direction) {
+        res = Object.entries(value.direction).reduce((dirRes, [key, dir]) => {
+          dirRes[key] = dir.filter(a => !a.length).length;
+          return dirRes;
+        }, {});
+      }
+    }
+    return res;
+  }, {}) : {};
+
   const toggleDrawer = () => setDrawer(s => !s);
   const getSrc = name => require(`../../assets/img/${name}`);
   const classes = useStyles();
@@ -78,13 +100,11 @@ const Home = () => {
   const gridClasses = useGridStyles();
 
   const handleAddDirection = () => {
-    // TODO validate
-    addDirection({
-      name,
-      description,
+    firebase.push('directions', { img, name, description, owner, state: 'ACTIVE' }).then(() => {
+      toggleDrawer();
+      setName('');
+      setDescription('');
     });
-    updateDirectionSprint();
-    toggleDrawer();
   };
   const onChangeName = (e) => {
     setName(e.target.value);
@@ -92,46 +112,72 @@ const Home = () => {
   const onChangeDescription = (e) => {
     setDescription(e.target.value);
   };
-  const getActionCount = directionId => {
-    if (currentSprint) {
-      return currentSprint.direction[directionId].filter(a => !a.length).length;
-    }
-    return 0;
+  const onChangeImg = (e) => {
+    setImg(e.target.value);
   };
   const handleShare = () => {
+    let text = sprints.filter(({ value }) => value.range[0] === new Date().toLocaleDateString()).reduce((res, { value }) => {
+      res += `
+Спринт ${value.range[0]}
+  ${Object.entries(value.direction).reduce((dirRes, [key, actions]) => {
+    const currDir = directionsData[key];
+    dirRes += `
+  ${currDir ? `${currDir.name}\n` : ''}
+  ${currDir && actions && actions.length ? actions.map(t => `- ${t};`).join('\n') : ''}`;return dirRes;}, '')}`;
+      return res;
+      }, '');
+
     navigator.share({
       title: 'Отчет',
-      text: 'результат отчета',
+      text,
     })
       .then(() => console.log('share success'))
       .catch(() => console.log('share fail'))
   };
 
+  const testBtn = async () => {
+
+  };
+
+  const defaultDirections = [
+    { id: 0, name: 'Музыка', img: 'music.jpg', description: '' },
+    { id: 1, name: 'Бизнес', img: 'business.jpg', description: '' },
+    { id: 2, name: 'Отношения', img: 'relationship.jpg', description: '' },
+    { id: 3, name: 'Связи', img: 'connections.jpg', description: '' },
+    { id: 4, name: 'Программирование', img: 'programming.jpg', description: '' },
+    { id: 5, name: 'Спорт', img: 'sport.jpg', description: '' },
+  ];
+
   return (
     <div>
       <Header title="Направления" showSprint/>
       <div className={classes.gridList}>
-        <GridList cellHeight={150}>
-          {directions.map(item => {
-            const completeActions = getActionCount(item.id);
-            return (
-              <GridListTile key={item.id} component={Link} to={`/${item.id}`} classes={gridClasses}>
-                {item.img ? <img src={getSrc(item.img)} alt={item.name}/> : null}
-                <GridListTileBar
-                  title={completeActions
-                    ? <Badge badgeContent={completeActions} color="secondary" classes={badgeClasses}>{item.name}</Badge>
-                    : <>{item.name} <DoneIcon color="secondary"/></>}
-                  subtitle={item.description}
-                />
-              </GridListTile>
-            )
-          })}
-        </GridList>
+        {isLoaded(directions) ? (
+          <GridList cellHeight={150}>
+            {isEmpty(directions) ? 'Нет данных' : directions.map(({ key, value }) => {
+              const completeActions = actionMap[key];
+              return (
+                <GridListTile key={key} component={Link} to={`/direction/${key}`} classes={gridClasses}>
+                  {value.img ? <img src={getSrc(value.img)} alt={value.name}/> : null}
+                  <GridListTileBar
+                    title={completeActions
+                      ? <Badge badgeContent={completeActions} color="secondary" classes={badgeClasses}>{value.name}</Badge>
+                      : <>{value.name} <DoneIcon color="secondary"/></>}
+                    subtitle={value.description}
+                  />
+                </GridListTile>
+              )
+            })}
+          </GridList>
+        ) : <CircularProgress />}
       </div>
       <Fab size="large" color="primary" className={classes.addBtn} onClick={toggleDrawer}>
         <AddIcon/>
       </Fab>
-      {navigator.share && (
+      {/*<Fab size="large" color="primary" onClick={testBtn}>*/}
+      {/*  <AddIcon/>*/}
+      {/*</Fab>*/}
+      {isLoaded(directions) && !isEmpty(sprints) && navigator.share && (
         <Fab size="large" color="secondary" className={classes.shareBtn} onClick={handleShare}>
           <ShareIcon/>
         </Fab>
@@ -150,6 +196,19 @@ const Home = () => {
           </div>
           <div className={classes.field}>
             <TextField value={description} onChange={onChangeDescription} fullWidth label="Почему это важно для меня?"/>
+          </div>
+          <div className={classes.field}>
+            <Select
+              value={img}
+              onChange={onChangeImg}
+              fullWidth
+              label="Изображение"
+              classes={{ select: classes.select }}
+            >
+              {defaultDirections.map(dir => (
+                <MenuItem key={dir.id} value={dir.img}><Avatar src={getSrc(dir.img)}/>{dir.name}</MenuItem>
+              ))}
+            </Select>
           </div>
           <Button
             variant="contained"

@@ -1,5 +1,6 @@
 import { createStore, applyMiddleware } from 'redux';
 import { composeWithDevTools } from 'redux-devtools-extension';
+import thunk from 'redux-thunk';
 import firebase from 'firebase/app';
 import 'firebase/auth';
 import 'firebase/database';
@@ -14,7 +15,9 @@ const rrfConfig = {
 
 firebase.initializeApp(getFirebaseConfig());
 
-const middlewares = [];
+const middlewares = [
+  thunk
+];
 
 function getEnhancer() {
   return composeWithDevTools(applyMiddleware(...middlewares));

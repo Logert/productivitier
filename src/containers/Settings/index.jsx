@@ -1,12 +1,10 @@
 import React from 'react';
 import { Slider, makeStyles, Button, Box, Typography } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
-import { useDispatch, useSelector } from 'react-redux';
-
-import { ADD_SPRINT } from '../../store/sprint/action';
+import { useFirebase, useFirebaseConnect } from 'react-redux-firebase';
+import { useSelector } from 'react-redux';
 
 import Header from '../Layout/Header';
-import moment from 'moment';
 
 const useStyles = makeStyles({
   field: {
@@ -16,10 +14,16 @@ const useStyles = makeStyles({
 });
 
 const Settings = () => {
-  const dispatch = useDispatch();
-  const addSprint = React.useCallback(data => {dispatch(ADD_SPRINT(data))});
-  const direction = useSelector(state => state.directions);
-  const currentSprint = useSelector(state => state.sprint.find(item => moment().isBetween(moment(item.date[0]), moment(item.date[1]))));
+  const firebase = useFirebase();
+  const auth = useSelector(state => state.firebase.auth);
+  const users = useSelector(state => state.firebase.data.users);
+  useFirebaseConnect([{ type: 'once', path: `users/${auth.uid}/settings` }]);
+
+  React.useEffect(() => {
+    setDays(users[auth.uid].settings.days);
+    setCount(users[auth.uid].settings.actionsCount);
+  }, [users, auth]);
+
   const [count, setCount] = React.useState(3);
   const [days, setDays] = React.useState(1);
   const onChangeDays = (e, value) => {
@@ -29,11 +33,10 @@ const Settings = () => {
     setCount(value);
   };
   const createSprint = () => {
-    addSprint({
-      date: [moment().startOf('D').valueOf(), moment().add(days - 1, 'days').endOf('D').valueOf()],
-      direction,
-      actions: count,
-    });
+    firebase.set(`users/${auth.uid}/settings`, {
+      days: 1,
+      actionsCount: count
+    })
   };
 
   const styles = useStyles();
@@ -53,7 +56,6 @@ const Settings = () => {
           max={10}
           onChange={onChangeDays}
           valueLabelDisplay="on"
-          disabled={!!currentSprint}
         />
       </div>
       <div className={styles.field}>
@@ -68,7 +70,6 @@ const Settings = () => {
           max={10}
           onChange={onChangeCount}
           valueLabelDisplay="on"
-          disabled={!!currentSprint}
         />
       </div>
       <div className={styles.field}>
@@ -78,8 +79,7 @@ const Settings = () => {
           color="primary"
           style={{ marginTop: 30 }}
           onClick={createSprint}
-          disabled={!!currentSprint}
-        >Создать спринт
+        >Сохранить
         </Button>
       </div>
     </Box>

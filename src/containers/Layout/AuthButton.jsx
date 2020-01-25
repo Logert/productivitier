@@ -24,12 +24,16 @@ const AuthButton = ({ history }) => {
   };
 
   const handleClose = () => {
-    history.push('/profile');
     setAnchorEl(null);
   };
 
   const handleLogout = () => {
     firebase.logout();
+  };
+
+  const goToProfile = () => {
+    handleClose();
+    history.push('/profile');
   };
 
   return (
@@ -58,7 +62,7 @@ const AuthButton = ({ history }) => {
         open={open}
         onClose={handleClose}
       >
-        <MenuItem onClick={handleClose}>Профиль</MenuItem>
+        <MenuItem onClick={goToProfile}>Профиль</MenuItem>
         <MenuItem onClick={handleLogout}>Выйти</MenuItem>
       </Menu>
     </div>

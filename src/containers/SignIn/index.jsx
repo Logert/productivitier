@@ -36,8 +36,6 @@ export default function SignIn() {
     });
   };
 
-  const handleAuthApple = () => {};
-
   const handleAuthAnonymously = () => {
     firebase.auth().signInAnonymously();
   };
@@ -62,16 +60,6 @@ export default function SignIn() {
             startIcon={<AndroidIcon/>}
           >
             Войти с помощью Google
-          </Button>
-          <Button
-            fullWidth
-            variant="contained"
-            color="primary"
-            className={classes.submit}
-            onClick={handleAuthApple}
-            startIcon={<AppleIcon/>}
-          >
-            Войти с помощью Apple ID
           </Button>
           <Button
             fullWidth

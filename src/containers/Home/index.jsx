@@ -128,7 +128,7 @@ const Home = () => {
     setImg(e.target.value);
   };
   const handleShare = () => {
-    const currSprint = sprints.filter(sprint => sprint.range[0] === new Date().toLocaleDateString())[0];
+    const currSprint = sprints.filter(sprint => sprint.range[0] === moment().format('DD.MM.YYYY'))[0];
     let text = '';
     if (currSprint) {
       const sprintDate = currSprint.range[0];

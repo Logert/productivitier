@@ -139,9 +139,10 @@ const Home = () => {
         text += ` ${currDir ? `${currDir.name}\n` : ''}`;
         if (currDir && actions && actions.length) {
           actions.forEach(t => {
-            text += `  - ${t};\n`
+            text += `  - ${t}\n`
           });
         }
+        text += '\n';
       });
 
     }

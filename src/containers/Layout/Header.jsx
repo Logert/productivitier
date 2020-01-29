@@ -13,11 +13,11 @@ const useStyles = makeStyles({
 });
 
 const Header = ({ title, onBack, showSprint }) => {
-  const owner = useSelector(state => state.firebase.auth.uid);
-  useFirebaseConnect([{ type: 'once', path: 'sprints', queryParams: ['orderByChild=owner', `equalTo=${owner}`] }]);
-  const sprints = useSelector(state => state.firebase.ordered.sprints) || [];
+  // const owner = useSelector(state => state.firebase.auth.uid);
+  // useFirebaseConnect([{ type: 'once', path: 'sprints', queryParams: ['orderByChild=owner', `equalTo=${owner}`] }]);
+  // const sprints = useSelector(state => state.firebase.ordered.sprints) || [];
 
-  const lastSprintDate = isLoaded(sprints) && sprints.length ? sprints[sprints.length - 1].value.range[0] : '';
+  // const lastSprintDate = isLoaded(sprints) && sprints.length ? sprints[sprints.length - 1].value.range[0] : '';
 
   const style = useStyles();
   return (
@@ -30,7 +30,7 @@ const Header = ({ title, onBack, showSprint }) => {
         )}
         <div className={style.title}>
           <Typography variant="h5">{title}</Typography>
-          {showSprint && <Typography variant="subtitle1">Спринт {lastSprintDate}</Typography>}
+          {/*{showSprint && <Typography variant="subtitle1">Спринт {lastSprintDate}</Typography>}*/}
         </div>
         <AuthButton/>
       </Toolbar>

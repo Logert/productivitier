@@ -6,7 +6,9 @@ import {
   Redirect,
 } from 'react-router-dom';
 import { useSelector } from 'react-redux'
-import { isLoaded, isEmpty } from 'react-redux-firebase'
+import { isEmpty } from 'react-redux-firebase'
+import { Snackbar, Button } from '@material-ui/core';
+import preval from 'preval.macro';
 
 import Layout from './containers/Layout';
 import Home from './containers/Home';
@@ -15,13 +17,16 @@ import Direction from './containers/Direction';
 import SignIn from './containers/SignIn';
 import Profile from './containers/Profile';
 
+import { useServiceWorker } from './serviceWorkerProvider';
+
 const Router = () => {
   const auth = useSelector(state => state.firebase.auth);
   const isLogin = !isEmpty(auth);
+  const { assetsUpdateReady, updateAssets } = useServiceWorker();
 
   return (
     <HashRouter>
-      {isLogin ? (
+      {isLogin && !assetsUpdateReady ? (
         <Layout>
           <Switch>
             <Route path="/" exact component={Home}/>
@@ -37,6 +42,22 @@ const Router = () => {
           <Redirect to="/"/>
         </Switch>
       )}
+      <Snackbar
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'center',
+        }}
+        open={assetsUpdateReady}
+        message="Доступна новая версия"
+        action={
+          <Button color="secondary" size="small" onClick={updateAssets}>
+            Обновить
+          </Button>
+        }
+      />
+      <p style={{ position: 'fixed', top: 0, right: 70, zIndex: 9999, fontSize: 9 }}>
+        Build Date: {preval`module.exports = new Date().toLocaleString();`}.
+      </p>
     </HashRouter>
   );
 };

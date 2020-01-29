@@ -13,3 +13,5 @@ export const getFirebaseConfig = () => ({
   appId: process.env.REACT_APP_APP_ID,
   measurementId: process.env.REACT_APP_MEASUREMENT_ID
 });
+
+export const firebaseValueToArr = data => data ? Object.entries(data).map(([uid, value]) => ({ ...value, uid })) : [];

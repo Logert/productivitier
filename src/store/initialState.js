@@ -1,1 +1,8 @@
-export default {};
+export default {
+  app: {
+    user: null,
+    directionsMap: {},
+  },
+  directions: [],
+  sprints: [],
+};

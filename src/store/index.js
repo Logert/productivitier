@@ -4,6 +4,7 @@ import thunk from 'redux-thunk';
 import firebase from 'firebase/app';
 import 'firebase/auth';
 import 'firebase/database';
+import { getFirebase } from 'react-redux-firebase';
 
 import { getFirebaseConfig } from '../utils';
 import rootReducer from './reducer';
@@ -16,7 +17,7 @@ const rrfConfig = {
 firebase.initializeApp(getFirebaseConfig());
 
 const middlewares = [
-  thunk
+  thunk.withExtraArgument(getFirebase)
 ];
 
 function getEnhancer() {

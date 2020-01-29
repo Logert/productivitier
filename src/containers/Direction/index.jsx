@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { useSelector } from 'react-redux';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import {
   AppBar,
   List,
@@ -9,7 +9,6 @@ import {
   Divider,
   TextField,
   Typography,
-  CircularProgress,
   Button,
   Dialog,
   DialogActions,
@@ -23,11 +22,14 @@ import DoneIcon from '@material-ui/icons/Done';
 import EditIcon from '@material-ui/icons/Edit';
 import DeleteIcon from '@material-ui/icons/Delete';
 import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
-import { useFirebase, useFirebaseConnect, isLoaded, isEmpty } from 'react-redux-firebase';
 import AwesomeDebouncePromise from 'awesome-debounce-promise';
 import { set, clone } from 'lodash';
 
 import Header from '../Layout/Header';
+
+import { getDirectionsMapThunk } from '../../store/app/thunk';
+import { removeDirectionThunk, updateDirectionThunk } from '../../store/directions/thunk';
+import { updateSprintActionThunk } from '../../store/sprints/thunk';
 
 const useStyles = makeStyles({
   speedDial: {
@@ -39,14 +41,19 @@ const useStyles = makeStyles({
 
 const Direction = ({ match, history }) => {
   const { dirUid } = match.params;
-  const firebase = useFirebase();
-  const owner = useSelector(state => state.firebase.auth.uid);
-  useFirebaseConnect([{ path: 'directions', queryParams: ['orderByChild=owner', `equalTo=${owner}`] }]);
-  useFirebaseConnect([{ type: 'once', path: 'sprints', queryParams: ['orderByChild=owner', `equalTo=${owner}`] }]);
-  const directions = (useSelector(state => state.firebase.ordered.directions) || []).filter(d => d.value.state === 'ACTIVE');
-  const directionsMap = useSelector(state => state.firebase.data.directions);
-  const fbSprints = useSelector(state => state.firebase.ordered.sprints);
-  const dirKeys = directions.map(dir => dir.key);
+
+  const dispatch = useDispatch();
+  const getDirectionsMap = useCallback(() => {dispatch(getDirectionsMapThunk());}, [dispatch]);
+  const removeDirection = useCallback(uid => {dispatch(removeDirectionThunk(uid));}, [dispatch]);
+  const updateDirection = useCallback((uid, data, onSuccess) => {dispatch(updateDirectionThunk(uid, data, onSuccess));}, [dispatch]);
+  const updateSprintAction = useCallback((...args) => {dispatch(updateSprintActionThunk(...args));}, [dispatch]);
+
+  const directions = useSelector(state => state.directions);
+  const directionsMap = useSelector(state => state.app.directionsMap);
+  const fbSprints = useSelector(state => state.sprints);
+
+  const dirKeys = directions.map(dir => dir.uid);
+
   const [tabIndex, setTabIndex] = useState(dirKeys.indexOf(dirUid) || 0);
   const [selectedDir, setSelectedDir] = useState(dirUid);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -55,6 +62,10 @@ const Direction = ({ match, history }) => {
   const [dirName, setDirName] = useState(directionsMap[selectedDir].name);
 
   const classes = useStyles();
+
+  useEffect(() => {
+    getDirectionsMap();
+  }, [directions]);
 
   useEffect(() => {
     setSprints(fbSprints);
@@ -77,24 +88,14 @@ const Direction = ({ match, history }) => {
     setSelectedDir(dirKeys[index]);
   };
 
-  const removeDirection = () => {
-    firebase.update(`directions/${selectedDir}`, { state: 'REMOVED' });
-  };
-
   const updateDirectionName = () => {
-    firebase.update(`directions/${selectedDir}`, { name: dirName }).then(toggleDialog);
+    updateDirection(selectedDir, { name: dirName }, toggleDialog);
   };
 
-  const fbUpdateAction = (sprintKey, directionKey, actionIndex, value) =>
-    firebase.update(`/sprints/${sprintKey}/direction/${directionKey}`, {
-        [actionIndex]: value,
-      }
-    );
-
-  const fbUpdateDebounced = AwesomeDebouncePromise(fbUpdateAction, 1000);
+  const fbUpdateDebounced = AwesomeDebouncePromise(updateSprintAction, 1000);
 
   const onFieldTextChange = async (sprintIndex, sprintKey, directionKey, actionIndex, value) => {
-    setSprints(set(clone(sprints), [sprintIndex, 'value', 'direction', directionKey, actionIndex], value));
+    setSprints(set(clone(sprints), [sprintIndex, 'direction', directionKey, actionIndex], value));
     await fbUpdateDebounced(sprintKey, directionKey, actionIndex, value);
   };
 
@@ -105,74 +106,69 @@ const Direction = ({ match, history }) => {
   return (
     <div>
       <Header onBack={history.goBack}/>
-      {isLoaded(directions) && isLoaded(sprints) ? (
-        <>
-          <AppBar position="sticky" color="default">
-            <Tabs
-              variant="scrollable"
-              scrollButtons="on"
-              value={tabIndex}
-              onChange={handleChange}
-              indicatorColor="primary"
-              textColor="primary"
-            >
-              {isEmpty(directions) ? 'Нет данных' : directions.map(({ key, value }) => (
-                <Tab key={key} label={value.name}/>
-              ))}
-            </Tabs>
-          </AppBar>
-          <SwipeableViews
-            index={tabIndex}
-            onChangeIndex={handleChangeIndex}
-          >
-            {isEmpty(directions) ? 'Нет данных' : directions.map(direction => (
-              <div key={direction.key}>
-                {isEmpty(fbSprints) ? 'Нет данных' : sprints.map((sprint, sprintIndex) => {
-                  const { value } = sprint;
-                  const date = new Date().toLocaleDateString();
-                  let title = '';
-                  let sprintEnd = true;
-                  const [startDate, endDate] = [value.range[0], value.range[1]];
-                  const sprintDirs = value.direction && value.direction[direction.key] || [];
-                  const isActionsComplete = sprintDirs.every(item => item.length);
+      <AppBar position="sticky" color="default">
+        <Tabs
+          variant="scrollable"
+          scrollButtons="on"
+          value={tabIndex}
+          onChange={handleChange}
+          indicatorColor="primary"
+          textColor="primary"
+        >
+          {directions.map(direction => (
+            <Tab key={direction.uid} label={direction.name}/>
+          ))}
+        </Tabs>
+      </AppBar>
+      <SwipeableViews
+        index={tabIndex}
+        onChangeIndex={handleChangeIndex}
+      >
+        {directions.map(direction => (
+          <div key={direction.uid}>
+            {sprints.map((sprint, sprintIndex) => {
+              const date = new Date().toLocaleDateString();
+              let title = '';
+              let sprintEnd = true;
+              const [startDate, endDate] = [sprint.range[0], sprint.range[1]];
+              const sprintDirs = sprint.direction && sprint.direction[direction.uid] || [];
+              const isActionsComplete = sprintDirs.every(item => item.length);
 
-                  if (startDate === endDate && startDate === date) {
-                    title = 'Текущий спринт';
-                    sprintEnd = false;
-                  } else if (startDate === endDate) {
-                    title = `Спринт ${endDate}`;
-                  } else {
-                    title = `Спринт c ${startDate} по ${endDate}`;
-                  }
-                  return (
-                    <div key={sprint.key}>
-                      <Divider/>
-                      <ListItem style={{ flexDirection: 'column' }}>
-                        <Typography color={sprintEnd ? 'textSecondary' : 'primary'}
-                                    variant="h6">{title} {isActionsComplete &&
-                        <DoneIcon color="secondary"/>}</Typography>
-                        <List style={{ width: '100%' }}>
-                          {value.direction && value.direction[direction.key] ? value.direction[direction.key].map((text, index) => (
-                            <ListItem key={index}>
-                              <TextField
-                                fullWidth
-                                value={text}
-                                label={`${index + 1} действие`}
-                                placeholder="Введите дейтсвие"
-                                onChange={e => onFieldTextChange(sprintIndex, sprint.key, direction.key, index, e.target.value)}
-                              />
-                            </ListItem>
-                          )) : <Typography style={{ textAlign: 'center' }}>Нет данных</Typography>}
-                        </List>
-                      </ListItem>
-                    </div>
-                  )
-                })}
-              </div>
-            ))}
-          </SwipeableViews>
-        </>
-      ) : <CircularProgress/>}
+              if (startDate === endDate && startDate === date) {
+                title = 'Текущий спринт';
+                sprintEnd = false;
+              } else if (startDate === endDate) {
+                title = `Спринт ${endDate}`;
+              } else {
+                title = `Спринт c ${startDate} по ${endDate}`;
+              }
+              return (
+                <div key={sprint.uid}>
+                  <Divider/>
+                  <ListItem style={{ flexDirection: 'column' }}>
+                    <Typography color={sprintEnd ? 'textSecondary' : 'primary'}
+                                variant="h6">{title} {isActionsComplete &&
+                    <DoneIcon color="secondary"/>}</Typography>
+                    <List style={{ width: '100%' }}>
+                      {sprint.direction && sprint.direction[direction.uid] ? sprint.direction[direction.uid].map((text, index) => (
+                        <ListItem key={index}>
+                          <TextField
+                            fullWidth
+                            value={text}
+                            label={`${index + 1} действие`}
+                            placeholder="Введите дейтсвие"
+                            onChange={e => onFieldTextChange(sprintIndex, sprint.uid, direction.uid, index, e.target.value)}
+                          />
+                        </ListItem>
+                      )) : <Typography style={{ textAlign: 'center' }}>Нет данных</Typography>}
+                    </List>
+                  </ListItem>
+                </div>
+              )
+            })}
+          </div>
+        ))}
+      </SwipeableViews>
       <SpeedDial
         ariaLabel="speedDial"
         open={speedDialOpen}
@@ -191,7 +187,7 @@ const Direction = ({ match, history }) => {
         <SpeedDialAction
           title="Удалить"
           icon={<DeleteIcon/>}
-          onClick={removeDirection}
+          onClick={() => removeDirection(selectedDir)}
         />
       </SpeedDial>
       <Dialog open={dialogOpen} onClose={toggleDialog}>

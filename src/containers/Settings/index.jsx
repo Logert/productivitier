@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import { Slider, makeStyles, Button, Box, Typography } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
-import { useFirebase, useFirebaseConnect } from 'react-redux-firebase';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 
 import Header from '../Layout/Header';
+
+import { updateUserSettingsThunk } from '../../store/app/thunk';
 
 const useStyles = makeStyles({
   field: {
@@ -14,18 +15,17 @@ const useStyles = makeStyles({
 });
 
 const Settings = () => {
-  const firebase = useFirebase();
-  const auth = useSelector(state => state.firebase.auth);
-  const users = useSelector(state => state.firebase.data.users);
-  useFirebaseConnect([{ type: 'once', path: `users/${auth.uid}/settings` }]);
+  const dispatch = useDispatch();
+  const user = useSelector(state => state.app.user);
+  const updateUserSettings = useCallback((...args) => {dispatch(updateUserSettingsThunk(...args))}, [dispatch]);
 
-  React.useEffect(() => {
-    setDays(users[auth.uid].settings.days);
-    setCount(users[auth.uid].settings.actionsCount);
-  }, [users, auth]);
+  useEffect(() => {
+    setDays(user.settings.days);
+    setCount(user.settings.actionsCount);
+  }, [user]);
 
-  const [count, setCount] = React.useState(3);
-  const [days, setDays] = React.useState(1);
+  const [count, setCount] = useState(3);
+  const [days, setDays] = useState(1);
   const onChangeDays = (e, value) => {
     setDays(value);
   };
@@ -33,10 +33,7 @@ const Settings = () => {
     setCount(value);
   };
   const createSprint = () => {
-    firebase.set(`users/${auth.uid}/settings`, {
-      days: 1,
-      actionsCount: count
-    })
+    updateUserSettings(days, count);
   };
 
   const styles = useStyles();

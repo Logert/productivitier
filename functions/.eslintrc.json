@@ -56,7 +56,7 @@
     // Warn against unnecessary calls to .bind()
     "no-extra-bind": 1,
 
-    // Warn against unnecessary labels    
+    // Warn against unnecessary labels
     "no-extra-label": 1,
 
     // Disallow leading or trailing decimal points in numeric literals
@@ -80,7 +80,7 @@
     // Require using Error objects as Promise rejection reasons
     "prefer-promise-reject-errors": 2,
 
-    // Enforce “for” loop update clause moving the counter in the right direction
+    // Enforce “for” loop update clause moving the counter in the right directions
     "for-direction": 2,
 
     // Enforce return statements in getters
@@ -111,7 +111,7 @@
     "prefer-arrow-callback": 1,
 
     // Return inside each then() to create readable and reusable Promise chains.
-    // Forces developers to return console logs and http calls in promises. 
+    // Forces developers to return console logs and http calls in promises.
     "promise/always-return": 2,
 
     //Enforces the use of catch() on un-returned promises

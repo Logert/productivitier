@@ -1,21 +1,21 @@
-import React, { useState, useCallback, useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { Link } from 'react-router-dom';
+import React, {useCallback, useEffect, useState} from 'react';
+import {useDispatch, useSelector} from 'react-redux';
+import {Link} from 'react-router-dom';
 import {
-  Typography,
-  Fab,
+  Avatar,
+  Badge,
+  Box,
+  Button,
   Drawer,
-  TextField,
+  Fab,
   GridList,
   GridListTile,
   GridListTileBar,
-  Badge,
   makeStyles,
-  Button,
-  Box,
-  Select,
   MenuItem,
-  Avatar,
+  Select,
+  TextField,
+  Typography,
 } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
 import DoneIcon from '@material-ui/icons/Done';
@@ -24,8 +24,8 @@ import moment from 'moment';
 
 import Header from '../Layout/Header';
 
-import { addDirectionThunk } from '../../store/directions/thunk';
-import { getDirectionsMapThunk } from '../../store/app/thunk';
+import {addDirectionThunk} from '../../store/directions/thunk';
+import {getDirectionsMapThunk} from '../../store/app/thunk';
 
 const useBadgeStyles = makeStyles({
   badge: {
@@ -127,12 +127,22 @@ const Home = () => {
   const onChangeImg = (e) => {
     setImg(e.target.value);
   };
+
+  const deleteRemovedDirectionsFromDirectionsMap = () => {
+    Object.keys(directionsMap).forEach(key => {
+      if ("REMOVED" === directionsMap[key].state) delete directionsMap[key];
+    });
+  };
+
   const handleShare = () => {
     const currSprint = sprints.filter(sprint => sprint.range[0] === moment().format('DD.MM.YYYY'))[0];
     let text = '';
     if (currSprint) {
       const sprintDate = currSprint.range[0];
       text = `Спринт ${sprintDate}\n\n`;
+
+      // It is definitely not right thing to do it here but...
+      deleteRemovedDirectionsFromDirectionsMap();
 
       Object.entries(currSprint.direction).forEach(([key, actions]) => {
         const currDir = directionsMap[key];

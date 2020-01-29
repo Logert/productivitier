@@ -30,6 +30,7 @@ import Header from '../Layout/Header';
 import { getDirectionsMapThunk } from '../../store/app/thunk';
 import { removeDirectionThunk, updateDirectionThunk } from '../../store/directions/thunk';
 import { updateSprintActionThunk } from '../../store/sprints/thunk';
+import moment from "moment";
 
 const useStyles = makeStyles({
   speedDial: {
@@ -126,8 +127,8 @@ const Direction = ({ match, history }) => {
       >
         {directions.map(direction => (
           <div key={direction.uid}>
-            {sprints.map((sprint, sprintIndex) => {
-              const date = new Date().toLocaleDateString();
+            {sprints.reverse().map((sprint, sprintIndex) => {
+              const date = moment().format('DD.MM.YYYY');
               let title = '';
               let sprintEnd = true;
               const [startDate, endDate] = [sprint.range[0], sprint.range[1]];

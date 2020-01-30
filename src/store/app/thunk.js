@@ -40,6 +40,8 @@ export const checkUserThunk = () => async (dispatch, getState, getFirebase) => {
           range: [moment().format('DD.MM.YYYY'), moment().format('DD.MM.YYYY')],
           direction,
         });
+
+        dispatch(getSprintsThunk());
       }
 
     } else {

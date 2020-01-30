@@ -127,7 +127,8 @@ const Direction = ({ match, history }) => {
       >
         {directions.map(direction => (
           <div key={direction.uid}>
-            {sprints.reverse().map((sprint, sprintIndex) => {
+            {sprints.sort((a, b) => (a.range[0] > b.range[0]) ? -1 : 1)
+                .map((sprint, sprintIndex) => {
               const date = moment().format('DD.MM.YYYY');
               let title = '';
               let sprintEnd = true;

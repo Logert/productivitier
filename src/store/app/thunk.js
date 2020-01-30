@@ -1,9 +1,9 @@
 import moment from 'moment';
 
-import { SET_USER, SET_DIRECTIONS_MAP } from './action';
+import {SET_DIRECTIONS_MAP, SET_USER} from './action';
 
-import { getSprintsThunk } from '../sprints/thunk';
-import { getDirectionsThunk } from '../directions/thunk';
+import {getSprintsThunk} from '../sprints/thunk';
+import {getDirectionsThunk} from '../directions/thunk';
 
 export const getUserThunk = () => async (dispatch, getState, getFirebase) => {
   const state = getState();
@@ -30,8 +30,8 @@ export const checkUserThunk = () => async (dispatch, getState, getFirebase) => {
 
       const lastSprintRange = sprints[sprints.length - 1].range;
       if (moment().format('DD.MM.YYYY') !== lastSprintRange[0]) {
-        const direction = directions.reduce((res, { key }) => {
-          res[key] = new Array(currUser.settings.actionsCount).fill('');
+        const direction = directions.reduce((res, item) => {
+          res[item.uid] = new Array(currUser.settings.actionsCount).fill('');
           return res;
         }, {});
 

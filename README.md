@@ -69,4 +69,4 @@ This section has moved here: https://facebook.github.io/create-react-app/docs/tr
 
 
 ### Upload new version on firebase
-`firebase deploy --only hosting
+`firebase deploy --only hosting`

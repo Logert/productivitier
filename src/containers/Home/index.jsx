@@ -26,6 +26,7 @@ import Header from '../Layout/Header';
 
 import {addDirectionThunk} from '../../store/directions/thunk';
 import {getDirectionsMapThunk} from '../../store/app/thunk';
+import Menu from "@material-ui/core/Menu";
 
 const useBadgeStyles = makeStyles({
   badge: {
@@ -72,6 +73,7 @@ const useStyles = makeStyles({
 
 const Home = () => {
   const [drawer, setDrawer] = useState(false);
+  const [reportMenu, setReportMenu] = useState(false);
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [img, setImg] = useState('music.jpg');
@@ -105,6 +107,7 @@ const Home = () => {
   }, [sprints]);
 
   const toggleDrawer = () => setDrawer(s => !s);
+  const toggleReportMenu = () => setReportMenu(s => !s);
   const getSrc = name => require(`../../assets/img/${name}`);
   const classes = useStyles();
   const badgeClasses = useBadgeStyles();
@@ -134,17 +137,26 @@ const Home = () => {
     });
   };
 
-  const handleShare = () => {
-    const currSprint = sprints.filter(sprint => sprint.range[0] === moment().format('DD.MM.YYYY'))[0];
+  const handleShare = (sprint) => {
+    let thisSprint;
+    const today = moment().format('DD.MM.YYYY');
+    const yesterday = moment().subtract(1, "days").format('DD.MM.YYYY');
+
+    if (sprint === 0) {
+      thisSprint = sprints.filter(sprint => sprint.range[0] === today)[0];
+    } else if (sprint === -1) {
+      thisSprint = sprints.filter(sprint => sprint.range[1] === yesterday)[0];
+    }
+
     let text = '';
-    if (currSprint) {
-      const sprintDate = currSprint.range[0];
+    if (thisSprint) {
+      const sprintDate = thisSprint.range[0];
       text = `Спринт ${sprintDate}\n\n`;
 
       // It is definitely not right thing to do it here but...
       deleteRemovedDirectionsFromDirectionsMap();
 
-      Object.entries(currSprint.direction).forEach(([key, actions]) => {
+      Object.entries(thisSprint.direction).forEach(([key, actions]) => {
         const currDir = directionsMap[key];
         text += ` ${currDir ? `${currDir.name}\n` : ''}`;
         if (currDir && actions && actions.length) {
@@ -199,10 +211,20 @@ const Home = () => {
         <AddIcon/>
       </Fab>
       {directions.length && sprints.length && navigator.share ? (
-        <Fab size="large" color="secondary" className={classes.shareBtn} onClick={handleShare}>
+        <Fab size="large" color="secondary" className={classes.shareBtn} onClick={toggleReportMenu}>
           <ShareIcon/>
         </Fab>
       ) : null}
+      <Menu
+          id="report-menu"
+          anchor="bottom"
+          keepMounted
+          open={reportMenu}
+          onClose={toggleReportMenu}
+      >
+        <MenuItem onClick={() => handleShare(-1)}>Предыдущий</MenuItem>
+        <MenuItem onClick={() => handleShare(0)}>Текущий</MenuItem>
+      </Menu>
       <Drawer
         anchor="bottom"
         open={drawer}

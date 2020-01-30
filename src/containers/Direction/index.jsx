@@ -1,35 +1,36 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import React, {useCallback, useEffect, useState} from 'react';
+import {useDispatch, useSelector} from 'react-redux';
 import {
   AppBar,
-  List,
-  ListItem,
-  Tabs,
-  Tab,
-  Divider,
-  TextField,
-  Typography,
+  Badge,
   Button,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
+  Divider,
+  List,
+  ListItem,
   makeStyles,
+  Tab,
+  Tabs,
+  TextField,
+  Typography,
 } from '@material-ui/core';
-import { SpeedDial, SpeedDialAction } from '@material-ui/lab';
+import {SpeedDial, SpeedDialAction} from '@material-ui/lab';
 import SwipeableViews from 'react-swipeable-views';
 import DoneIcon from '@material-ui/icons/Done';
 import EditIcon from '@material-ui/icons/Edit';
 import DeleteIcon from '@material-ui/icons/Delete';
 import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
 import AwesomeDebouncePromise from 'awesome-debounce-promise';
-import { set, clone } from 'lodash';
+import {clone, set} from 'lodash';
 
 import Header from '../Layout/Header';
 
-import { getDirectionsMapThunk } from '../../store/app/thunk';
-import { removeDirectionThunk, updateDirectionThunk } from '../../store/directions/thunk';
-import { updateSprintActionThunk } from '../../store/sprints/thunk';
+import {getDirectionsMapThunk} from '../../store/app/thunk';
+import {removeDirectionThunk, updateDirectionThunk} from '../../store/directions/thunk';
+import {updateSprintActionThunk} from '../../store/sprints/thunk';
 import moment from "moment";
 
 const useStyles = makeStyles({

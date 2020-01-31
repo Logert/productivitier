@@ -53,6 +53,7 @@ const Direction = ({ match, history }) => {
   const directions = useSelector(state => state.directions);
   const directionsMap = useSelector(state => state.app.directionsMap);
   const fbSprints = useSelector(state => state.sprints);
+  const actionMap = useSelector(state => state.app.actionsMap);
 
   const dirKeys = directions.map(dir => dir.uid);
 
@@ -117,9 +118,15 @@ const Direction = ({ match, history }) => {
           indicatorColor="primary"
           textColor="primary"
         >
-          {directions.map(direction => (
-            <Tab key={direction.uid} label={direction.name}/>
-          ))}
+          {directions.map(direction => {
+            const completeActions = actionMap[direction.uid];
+            return (
+              <Tab
+                key={direction.uid}
+                label={<div>{direction.name} <Typography component="span" color="secondary">{!completeActions ? <DoneIcon color="secondary"/> : completeActions}</Typography></div>}
+              />
+            )
+          })}
         </Tabs>
       </AppBar>
       <SwipeableViews

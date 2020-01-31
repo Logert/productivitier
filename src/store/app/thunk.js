@@ -1,6 +1,6 @@
 import moment from 'moment';
 
-import {SET_DIRECTIONS_MAP, SET_USER} from './action';
+import {SET_DIRECTIONS_MAP, SET_USER, SET_ACTIONS_MAP} from './action';
 
 import {getSprintsThunk} from '../sprints/thunk';
 import {getDirectionsThunk} from '../directions/thunk';
@@ -98,4 +98,20 @@ export const getDirectionsMapThunk = () => async (dispatch, getState, getFirebas
     .once('value');
 
   dispatch(SET_DIRECTIONS_MAP(snapshot.val()));
+};
+
+export const getActionMapThunk = () => (dispatch, getState) => {
+  const actionMap = getState().sprints.reduce((res, sprint) => {
+    if (moment().isBetween(moment(sprint.range[0], 'DD.MM.YYYY').startOf('D'), moment(sprint.range[1], 'DD.MM.YYYY').endOf('D'))) {
+      if (sprint.direction) {
+        res = Object.entries(sprint.direction).reduce((dirRes, [key, dir]) => {
+          dirRes[key] = dir.filter(a => !a.length).length;
+          return dirRes;
+        }, {});
+      }
+    }
+    return res;
+  }, {});
+
+  dispatch(SET_ACTIONS_MAP(actionMap));
 };

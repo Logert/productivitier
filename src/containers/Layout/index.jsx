@@ -15,12 +15,12 @@ moment.locale('ru');
 
 const useStyles = makeStyles({
   content: {
-    height: 'calc(100% - 64px)',
+    height: 'calc(100% - 57px)',
     overflow: 'auto',
   },
   container: {
-    height: 'calc(100vh - 64px)',
-    marginTop: '64px',
+    height: 'calc(100vh - 57px)',
+    marginTop: '56px',
   },
 });
 

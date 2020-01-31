@@ -77,7 +77,6 @@ const Home = () => {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [img, setImg] = useState('music.jpg');
-  const [actionMap, setActionMap] = useState({});
 
   const dispatch = useDispatch();
   const getDirectionsMap = useCallback(() => {dispatch(getDirectionsMapThunk());}, [dispatch]);
@@ -85,26 +84,12 @@ const Home = () => {
 
   const directions = useSelector(state => state.directions);
   const directionsMap = useSelector(state => state.app.directionsMap);
+  const actionMap = useSelector(state => state.app.actionsMap);
   const sprints = useSelector(state => state.sprints);
 
   useEffect(() => {
     getDirectionsMap();
   }, [directions]);
-
-  useEffect(() => {
-    const actionMap = sprints.reduce((res, sprint) => {
-      if (moment().isBetween(moment(sprint.range[0], 'DD.MM.YYYY').startOf('D'), moment(sprint.range[1], 'DD.MM.YYYY').endOf('D'))) {
-        if (sprint.direction) {
-          res = Object.entries(sprint.direction).reduce((dirRes, [key, dir]) => {
-            dirRes[key] = dir.filter(a => !a.length).length;
-            return dirRes;
-          }, {});
-        }
-      }
-      return res;
-    }, {});
-    setActionMap(actionMap);
-  }, [sprints]);
 
   const toggleDrawer = () => setDrawer(s => !s);
   const toggleReportMenu = () => setReportMenu(s => !s);

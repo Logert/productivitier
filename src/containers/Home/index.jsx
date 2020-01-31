@@ -178,12 +178,12 @@ const Home = () => {
   };
 
   const defaultDirections = [
-    { id: 0, name: 'Музыка', img: 'music.jpg', description: '' },
-    { id: 1, name: 'Бизнес', img: 'business.jpg', description: '' },
-    { id: 2, name: 'Отношения', img: 'relationship.jpg', description: '' },
-    { id: 3, name: 'Связи', img: 'connections.jpg', description: '' },
-    { id: 4, name: 'Программирование', img: 'programming.jpg', description: '' },
-    { id: 5, name: 'Спорт', img: 'sport.jpg', description: '' },
+    { id: 0, name: 'Картинка "Музыка"', img: 'music.jpg', description: '' },
+    { id: 1, name: 'Картинка "Бизнес"', img: 'business.jpg', description: '' },
+    { id: 2, name: 'Картинка "Отношения"', img: 'relationship.jpg', description: '' },
+    { id: 3, name: 'Картинка "Связи"', img: 'connections.jpg', description: '' },
+    { id: 4, name: 'Картинка "Программирование"', img: 'programming.jpg', description: '' },
+    { id: 5, name: 'Картинка "Спорт"', img: 'sport.jpg', description: '' },
   ];
 
   return (

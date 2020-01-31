@@ -28,8 +28,7 @@ export const checkUserThunk = () => async (dispatch, getState, getFirebase) => {
       await dispatch(getDirectionsThunk());
       const { sprints, directions } = getState();
 
-      const lastSprintRange = sprints[sprints.length - 1].range;
-      if (moment().format('DD.MM.YYYY') !== lastSprintRange[0]) {
+      if (!sprints.length || moment().format('DD.MM.YYYY') !== sprints[sprints.length - 1].range[0]) {
         const direction = directions.reduce((res, item) => {
           res[item.uid] = new Array(currUser.settings.actionsCount).fill('');
           return res;

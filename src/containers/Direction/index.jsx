@@ -158,8 +158,8 @@ const Direction = ({ match, history }) => {
                           <TextField
                             fullWidth
                             value={text}
-                            label={`${index + 1} действие`}
-                            placeholder="Введите действие"
+                            label={`${index + 1} простое значимое действие`}
+                            placeholder="Введите действие, которое точно вас приблизило к цели"
                             onChange={e => onFieldTextChange(sprintIndex, sprint.uid, direction.uid, index, e.target.value)}
                           />
                         </ListItem>

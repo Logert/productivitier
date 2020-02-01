@@ -135,8 +135,11 @@ const Direction = ({ match, history }) => {
       >
         {directions.map(direction => (
           <div key={direction.uid}>
-            {sprints.sort((a, b) => (a.range[0] > b.range[0]) ? -1 : 1)
-                .map((sprint, sprintIndex) => {
+            {sprints.sort((a, b) => {
+              let momentA = moment(a.range[0], 'DD.MM.YYYY');
+              let momentB = moment(b.range[0], 'DD.MM.YYYY');
+              return momentA.isAfter(momentB) ? -1 : 1
+            }).map((sprint, sprintIndex) => {
               const date = moment().format('DD.MM.YYYY');
               let title = '';
               let sprintEnd = true;

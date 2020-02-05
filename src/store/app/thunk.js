@@ -28,15 +28,27 @@ export const checkUserThunk = () => async (dispatch, getState, getFirebase) => {
       await dispatch(getDirectionsThunk());
       const { sprints, directions } = getState();
 
-      if (!sprints.length || moment().format('DD.MM.YYYY') !== sprints[sprints.length - 1].range[0]) {
-        const direction = directions.reduce((res, item) => {
-          res[item.uid] = new Array(currUser.settings.actionsCount).fill('');
-          return res;
-        }, {});
+      const direction = directions.reduce((res, item) => {
+        res[item.uid] = new Array(currUser.settings.actionsCount).fill('');
+        return res;
+      }, {});
 
+      if (sprints.length) {
+        const [, endDate] = sprints[sprints.length - 1].range;
+
+        if (moment().isAfter(moment(endDate, 'DD.MM.YYYY'))) {
+          await getFirebase().ref('/sprints').push({
+            owner: auth.uid,
+            range: [moment().format('DD.MM.YYYY'), moment().add(currUser.settings.days - 1, 'days').format('DD.MM.YYYY')],
+            direction,
+          });
+          dispatch(getSprintsThunk());
+        }
+
+      } else {
         await getFirebase().ref('/sprints').push({
           owner: auth.uid,
-          range: [moment().format('DD.MM.YYYY'), moment().format('DD.MM.YYYY')],
+          range: [moment().format('DD.MM.YYYY'), moment().add(currUser.settings.days - 1, 'days').format('DD.MM.YYYY')],
           direction,
         });
 
@@ -79,7 +91,7 @@ export const updateUserSettingsThunk = (days, count) => async (dispatch, getStat
   try {
     const user = getState().app.user;
     await getFirebase().ref(`users/${user.uid}/settings`).update({
-      days: 1,
+      days,
       actionsCount: count
     });
     dispatch(getUserThunk());

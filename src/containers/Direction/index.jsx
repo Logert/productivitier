@@ -2,7 +2,6 @@ import React, {useCallback, useEffect, useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 import {
   AppBar,
-  Badge,
   Button,
   Dialog,
   DialogActions,
@@ -143,7 +142,7 @@ const Direction = ({ match, history }) => {
               const date = moment().format('DD.MM.YYYY');
               let title = '';
               let sprintEnd = true;
-              const [startDate, endDate] = [sprint.range[0], sprint.range[1]];
+              const [startDate, endDate] = sprint.range;
               const sprintDirs = sprint.direction && sprint.direction[direction.uid] || [];
               const isActionsComplete = sprintDirs.every(item => item.length);
 
@@ -154,6 +153,7 @@ const Direction = ({ match, history }) => {
                 title = `Спринт ${endDate}`;
               } else {
                 title = `Спринт c ${startDate} по ${endDate}`;
+                sprintEnd = !moment().isBetween(moment(startDate, 'DD.MM.YYYY'), moment(endDate, 'DD.MM.YYYY'));
               }
               return (
                 <div key={sprint.uid}>

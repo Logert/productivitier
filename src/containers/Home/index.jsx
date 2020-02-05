@@ -17,16 +17,18 @@ import {
   TextField,
   Typography,
 } from '@material-ui/core';
+import {SpeedDial, SpeedDialAction} from '@material-ui/lab';
 import AddIcon from '@material-ui/icons/Add';
 import DoneIcon from '@material-ui/icons/Done';
 import ShareIcon from '@material-ui/icons/Share';
+import Brightness2Icon from '@material-ui/icons/Brightness2';
+import Brightness5Icon from '@material-ui/icons/Brightness5';
 import moment from 'moment';
 
 import Header from '../Layout/Header';
 
 import {addDirectionThunk} from '../../store/directions/thunk';
 import {getDirectionsMapThunk} from '../../store/app/thunk';
-import Menu from "@material-ui/core/Menu";
 
 const useBadgeStyles = makeStyles({
   badge: {
@@ -44,7 +46,7 @@ const useGridStyles = makeStyles({
   }
 });
 
-const useStyles = makeStyles({
+const useStyles = makeStyles(theme => ({
   gridList: {
     display: 'flex',
     flexWrap: 'wrap',
@@ -69,7 +71,13 @@ const useStyles = makeStyles({
     justifyContent: 'center',
     alignItems: 'center',
   },
-});
+  shareFab: {
+    backgroundColor: theme.palette.secondary.main,
+    '&:hover': {
+      backgroundColor: theme.palette.secondary.dark,
+    }
+  }
+}));
 
 const Home = () => {
   const [drawer, setDrawer] = useState(false);
@@ -171,6 +179,9 @@ const Home = () => {
     { id: 5, name: 'Картинка "Спорт"', img: 'sport.jpg', description: '' },
   ];
 
+  const prevSprint = () => handleShare(-1);
+  const currentSprint = () => handleShare(0);
+
   return (
     <div>
       <Header title="Направления" showSprint/>
@@ -196,20 +207,30 @@ const Home = () => {
         <AddIcon/>
       </Fab>
       {directions.length && sprints.length && navigator.share ? (
-        <Fab size="large" color="secondary" className={classes.shareBtn} onClick={toggleReportMenu}>
-          <ShareIcon/>
-        </Fab>
-      ) : null}
-      <Menu
-          id="report-menu"
-          anchor="bottom"
-          keepMounted
+        <SpeedDial
+          ariaLabel="speedDial"
           open={reportMenu}
+          className={classes.shareBtn}
+          icon={<ShareIcon/>}
+          direction="up"
           onClose={toggleReportMenu}
-      >
-        <MenuItem onClick={() => handleShare(-1)}>Предыдущий</MenuItem>
-        <MenuItem onClick={() => handleShare(0)}>Текущий</MenuItem>
-      </Menu>
+          onOpen={toggleReportMenu}
+          classes={{
+            fab: classes.shareFab
+          }}
+        >
+          <SpeedDialAction
+            title="Текущий спринт"
+            icon={<Brightness5Icon/>}
+            onClick={currentSprint}
+          />
+          <SpeedDialAction
+            title="Предыдущий спринт"
+            icon={<Brightness2Icon/>}
+            onClick={prevSprint}
+          />
+        </SpeedDial>
+      ) : null}
       <Drawer
         anchor="bottom"
         open={drawer}

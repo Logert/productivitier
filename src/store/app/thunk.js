@@ -36,7 +36,7 @@ export const checkUserThunk = () => async (dispatch, getState, getFirebase) => {
       if (sprints.length) {
         const [, endDate] = sprints[sprints.length - 1].range;
 
-        if (moment().isAfter(moment(endDate, 'DD.MM.YYYY'))) {
+        if (moment().startOf('D').isAfter(moment(endDate, 'DD.MM.YYYY'))) {
           await getFirebase().ref('/sprints').push({
             owner: auth.uid,
             range: [moment().format('DD.MM.YYYY'), moment().add(currUser.settings.days - 1, 'days').format('DD.MM.YYYY')],

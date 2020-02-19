@@ -8,6 +8,7 @@ export const getSprintsThunk = () => async (dispatch, getState, getFirebase) => 
   const auth = getState().firebase.auth;
   const snapshot = await getFirebase()
     .ref('/sprints')
+    .limitToLast(5)
     .orderByChild('owner')
     .equalTo(auth.uid)
     .once('value');
